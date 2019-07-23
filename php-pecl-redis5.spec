@@ -1,6 +1,6 @@
-# centos/sclo spec file for php-pecl-redis4, from:
+# centos/sclo spec file for php-pecl-redis5, from:
 #
-# remirepo spec file for php-pecl-redis4
+# remirepo spec file for php-pecl-redis5
 #
 # Copyright (c) 2012-2019 Remi Collet
 # License: CC-BY-SA
@@ -21,18 +21,21 @@
 %if "%{scl}" == "rh-php72"
 %global sub_prefix sclo-php72-
 %endif
+%if "%{scl}" == "rh-php73"
+%global sub_prefix sclo-php73-
+%endif
 %else
 %global _root_bindir %{_bindir}
 %endif
 
 %global pecl_name   redis
 %global with_igbin  1
-# after 40-igbinary
+# after 20-json, 40-igbinary and 40-msgpack
 %global ini_name    50-%{pecl_name}.ini
-%global upstream_version 4.3.0
+%global upstream_version 5.0.1
 
 Summary:       Extension for communicating with the Redis key-value store
-Name:          %{?sub_prefix}php-pecl-redis4
+Name:          %{?sub_prefix}php-pecl-redis5
 Version:       %{upstream_version}%{?upstream_prever:~%{upstream_prever}}
 Release:       1%{?dist}
 Source0:       http://pecl.php.net/get/%{pecl_name}-%{upstream_version}%{?upstream_prever}.tgz
@@ -40,18 +43,25 @@ License:       PHP
 URL:           http://pecl.php.net/package/redis
 
 BuildRequires: gcc
-BuildRequires: %{?scl_prefix}php-devel
+BuildRequires: %{?scl_prefix}php-devel > 7
 BuildRequires: %{?scl_prefix}php-pear
+BuildRequires: %{?scl_prefix}php-json
 %if %{with_igbin}
 BuildRequires: %{?scl_prefix}php-pecl-igbinary-devel
+%endif
+%ifnarch ppc64
+BuildRequires: %{?scl_prefix}php-pecl-msgpack-devel >= 2.0.3
 %endif
 
 Requires:      %{?scl_prefix}php(zend-abi) = %{php_zend_api}
 Requires:      %{?scl_prefix}php(api) = %{php_core_api}
+Requires:      %{?scl_prefix}php-json%{?_isa}
 %if %{with_igbin}
-Requires:      %{?scl_prefix}php-pecl(igbinary)%{?_isa}
+Requires:      %{?scl_prefix}php-igbinary%{?_isa}
 %endif
-%{?_sclreq:Requires: %{?scl_prefix}runtime%{?_sclreq}%{?_isa}}
+%ifnarch ppc64
+Requires:      %{?scl_prefix}php-msgpack%{?_isa} >= 2.0.3
+%endif
 
 Obsoletes:     %{?scl_prefix}php-%{pecl_name}               < 3
 Provides:      %{?scl_prefix}php-%{pecl_name}               = %{version}
@@ -59,19 +69,24 @@ Provides:      %{?scl_prefix}php-%{pecl_name}%{?_isa}       = %{version}
 Provides:      %{?scl_prefix}php-pecl(%{pecl_name})         = %{version}
 Provides:      %{?scl_prefix}php-pecl(%{pecl_name})%{?_isa} = %{version}
 
-%if "%{php_version}" > "7.2"
-Obsoletes:     %{?scl_prefix}php-pecl-%{pecl_name}          < 4
+%if "%{php_version}" > "7.3"
+Obsoletes:     %{?scl_prefix}php-pecl-%{pecl_name}          < 5
 Provides:      %{?scl_prefix}php-pecl-%{pecl_name}          = %{version}-%{release}
 Provides:      %{?scl_prefix}php-pecl-%{pecl_name}%{?_isa}  = %{version}-%{release}
+Obsoletes:     %{?scl_prefix}php-pecl-%{pecl_name}4         < 5
+Provides:      %{?scl_prefix}php-pecl-%{pecl_name}4         = %{version}-%{release}
+Provides:      %{?scl_prefix}php-pecl-%{pecl_name}4%{?_isa} = %{version}-%{release}
 %else
 # A single version can be installed
-Conflicts:     %{?sub_prefix}php-pecl-%{pecl_name} < 4
-Conflicts:     %{?scl_prefix}php-pecl-%{pecl_name} < 4
+Conflicts:     %{?sub_prefix}php-pecl-%{pecl_name}          < 5
+Conflicts:     %{?scl_prefix}php-pecl-%{pecl_name}          < 5
+Conflicts:     %{?sub_prefix}php-pecl-%{pecl_name}4         < 5
+Conflicts:     %{?scl_prefix}php-pecl-%{pecl_name}4         < 5
 %endif
 
 %if "%{?scl_prefix}" != "%{?sub_prefix}"
-Provides:      %{?scl_prefix}php-pecl-%{pecl_name}4         = %{version}-%{release}
-Provides:      %{?scl_prefix}php-pecl-%{pecl_name}4%{?_isa} = %{version}-%{release}
+Provides:      %{?scl_prefix}php-pecl-%{pecl_name}5         = %{version}-%{release}
+Provides:      %{?scl_prefix}php-pecl-%{pecl_name}5%{?_isa} = %{version}-%{release}
 %endif
 
 %if 0%{?fedora} < 20 && 0%{?rhel} < 7
@@ -142,12 +157,13 @@ extension = %{pecl_name}.so
 ;redis.arrays.readtimeout = 0
 ;redis.arrays.retryinterval = 0
 ;redis.arrays.consistent = 0
+;redis.clusters.cache_slots = 0
 ;redis.clusters.auth = 0
 ;redis.clusters.persistent = 0
 ;redis.clusters.read_timeout = 0
 ;redis.clusters.seeds = ''
 ;redis.clusters.timeout = 0
-;redis.pconnect.pooling_enabled = 0
+;redis.pconnect.pooling_enabled = 1
 ;redis.pconnect.connection_limit = 0
 ;redis.session.locking_enabled = 0
 ;redis.session.lock_expire = 0
@@ -164,6 +180,9 @@ cd NTS
     --enable-redis-session \
 %if %{with_igbin}
     --enable-redis-igbinary \
+%endif
+%ifnarch ppc64
+    --enable-redis-msgpack \
 %endif
     --enable-redis-lzf \
     --with-php-config=%{_bindir}/php-config
@@ -187,10 +206,15 @@ done
 
 %check
 # simple module load test
-%{__php} --no-php-ini \
+DEPS="--no-php-ini  --define extension=json.so"
 %if %{with_igbin}
-    --define extension=igbinary.so \
+    DEPS="$DEPS --define extension=igbinary.so"
 %endif
+%ifnarch ppc64
+    DEPS="$DEPS --define extension=msgpack.so"
+%endif
+
+%{__php} $DEPS \
     --define extension=%{buildroot}%{php_extdir}/%{pecl_name}.so \
     --modules | grep %{pecl_name}
 
@@ -223,6 +247,13 @@ fi
 
 
 %changelog
+* Tue Jul 23 2019 Remi Collet <remi@remirepo.net> - 5.0.1-1
+- rename to php-pecl-redis5
+- update to 5.0.1
+- enable msgpack support
+- enable json support
+- update configuration for new options
+
 * Thu Mar 14 2019 Remi Collet <remi@remirepo.net> - 4.3.0-1
 - update to 4.3.0
 
