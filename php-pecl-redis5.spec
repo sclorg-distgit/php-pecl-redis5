@@ -12,12 +12,6 @@
 %if 0%{?scl:1}
 %global sub_prefix %{scl_prefix}
 %scl_package       php-pecl-redis
-%if "%{scl}" == "rh-php70"
-%global sub_prefix sclo-php70-
-%endif
-%if "%{scl}" == "rh-php71"
-%global sub_prefix sclo-php71-
-%endif
 %if "%{scl}" == "rh-php72"
 %global sub_prefix sclo-php72-
 %endif
@@ -32,7 +26,7 @@
 %global with_igbin  1
 # after 20-json, 40-igbinary and 40-msgpack
 %global ini_name    50-%{pecl_name}.ini
-%global upstream_version 5.0.2
+%global upstream_version 5.1.0
 
 Summary:       Extension for communicating with the Redis key-value store
 Name:          %{?sub_prefix}php-pecl-redis5
@@ -185,6 +179,7 @@ cd NTS
     --enable-redis-msgpack \
 %endif
     --enable-redis-lzf \
+    --disable-redis-zstd \
     --with-php-config=%{_bindir}/php-config
 make %{?_smp_mflags}
 
@@ -247,6 +242,9 @@ fi
 
 
 %changelog
+* Mon Nov  4 2019 Remi Collet <remi@remirepo.net> - 5.1.0-1
+- update to 5.1.0
+
 * Tue Jul 30 2019 Remi Collet <remi@remirepo.net> - 5.0.2-1
 - update to 5.0.2
 
