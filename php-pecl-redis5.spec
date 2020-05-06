@@ -26,7 +26,7 @@
 %global with_igbin  1
 # after 20-json, 40-igbinary and 40-msgpack
 %global ini_name    50-%{pecl_name}.ini
-%global upstream_version 5.2.1
+%global upstream_version 5.2.2
 
 Summary:       Extension for communicating with the Redis key-value store
 Name:          %{?sub_prefix}php-pecl-redis5
@@ -140,6 +140,7 @@ extension = %{pecl_name}.so
 ;redis.arrays.auth = ''
 ;redis.arrays.autorehash = 0
 ;redis.arrays.connecttimeout = 0
+;redis.arrays.consistent = 0
 ;redis.arrays.distributor = ''
 ;redis.arrays.functions = ''
 ;redis.arrays.hosts = ''
@@ -150,19 +151,19 @@ extension = %{pecl_name}.so
 ;redis.arrays.previous = ''
 ;redis.arrays.readtimeout = 0
 ;redis.arrays.retryinterval = 0
-;redis.arrays.consistent = 0
-;redis.clusters.cache_slots = 0
 ;redis.clusters.auth = 0
+;redis.clusters.cache_slots = 0
 ;redis.clusters.persistent = 0
 ;redis.clusters.read_timeout = 0
 ;redis.clusters.seeds = ''
 ;redis.clusters.timeout = 0
 ;redis.pconnect.pooling_enabled = 1
 ;redis.pconnect.connection_limit = 0
-;redis.session.locking_enabled = 0
+;redis.pconnect.echo_check_liveness = 1
 ;redis.session.lock_expire = 0
 ;redis.session.lock_retries = 10
 ;redis.session.lock_wait_time = 2000
+;redis.session.locking_enabled = 0
 EOF
 
 
@@ -242,6 +243,10 @@ fi
 
 
 %changelog
+* Wed May  6 2020 Remi Collet <remi@remirepo.net> - 5.2.2-1
+- update to 5.2.2
+- refresh options in provided configuration file
+
 * Fri Mar 20 2020 Remi Collet <remi@remirepo.net> - 5.2.1-1
 - update to 5.2.1
 
