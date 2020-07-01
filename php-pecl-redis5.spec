@@ -26,7 +26,7 @@
 %global with_igbin  1
 # after 20-json, 40-igbinary and 40-msgpack
 %global ini_name    50-%{pecl_name}.ini
-%global upstream_version 5.2.2
+%global upstream_version 5.3.0
 
 Summary:       Extension for communicating with the Redis key-value store
 Name:          %{?sub_prefix}php-pecl-redis5
@@ -46,6 +46,7 @@ BuildRequires: %{?scl_prefix}php-pecl-igbinary-devel
 %ifnarch ppc64
 BuildRequires: %{?scl_prefix}php-pecl-msgpack-devel >= 2.0.3
 %endif
+BuildRequires: pkgconfig(liblz4)
 
 Requires:      %{?scl_prefix}php(zend-abi) = %{php_zend_api}
 Requires:      %{?scl_prefix}php(api) = %{php_core_api}
@@ -160,6 +161,7 @@ extension = %{pecl_name}.so
 ;redis.pconnect.pooling_enabled = 1
 ;redis.pconnect.connection_limit = 0
 ;redis.pconnect.echo_check_liveness = 1
+;redis.pconnect.pool_pattern => ''
 ;redis.session.lock_expire = 0
 ;redis.session.lock_retries = 10
 ;redis.session.lock_wait_time = 2000
@@ -181,6 +183,8 @@ cd NTS
 %endif
     --enable-redis-lzf \
     --disable-redis-zstd \
+    --enable-redis-lz4 \
+    --with-liblz4 \
     --with-php-config=%{_bindir}/php-config
 make %{?_smp_mflags}
 
@@ -243,6 +247,11 @@ fi
 
 
 %changelog
+* Wed Jul  1 2020 Remi Collet <remi@remirepo.net> - 5.3.0-1
+- update to 5.3.0
+- enable lz4 compression support
+- add new option in provided configuration file
+
 * Wed May  6 2020 Remi Collet <remi@remirepo.net> - 5.2.2-1
 - update to 5.2.2
 - refresh options in provided configuration file
